@@ -71,4 +71,25 @@ describe('TipsCarousel', () => {
     });
     expect(screen.getByText('Tip A')).toBeInTheDocument();
   });
+
+  it('renders accessible, keyboard-focusable buttons for each bullet', async () => {
+    const user = userEvent.setup();
+    render(<TipsCarousel tips={['Tip A', 'Tip B', 'Tip C']} />);
+    const buttons = screen.getAllByRole('button');
+    expect(buttons).toHaveLength(3);
+    expect(buttons[0]).toHaveAttribute('aria-label', 'Show tip 1 of 3');
+    expect(buttons[0]).toHaveAttribute('aria-current', 'true');
+    expect(buttons[1]).not.toHaveAttribute('aria-current');
+
+    buttons[1].focus();
+    expect(buttons[1]).toHaveFocus();
+    await user.keyboard('{Enter}');
+    expect(screen.getByText('Tip B')).toBeInTheDocument();
+    expect(buttons[1]).toHaveAttribute('aria-current', 'true');
+
+    buttons[2].focus();
+    await user.keyboard(' ');
+    expect(screen.getByText('Tip C')).toBeInTheDocument();
+    expect(buttons[2]).toHaveAttribute('aria-current', 'true');
+  });
 });
